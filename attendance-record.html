@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光青小组出席人数记录表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        select, input, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            text-align: left;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .secondary-page {
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            word-wrap: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+    <script>
+        function saveRecord() {
+            let recorder = document.getElementById("recorder").value;
+            let group = document.getElementById("group").value;
+            let date = document.getElementById("date").value;
+            let event = document.getElementById("event").value;
+            let location = document.getElementById("location").value;
+            let attendees = document.getElementById("attendees").value;
+            
+            if (!recorder || !date || !event || !location || !attendees) {
+                alert("请填写所有字段！");
+                return;
+            }
+            
+            let record = { recorder, group, date, event, location, attendees };
+            let records = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
+            records.push(record);
+            localStorage.setItem("attendanceRecords", JSON.stringify(records));
+            alert("记录已保存！");
+        }
+
+        function displayRecords() {
+            let records = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
+            let tableBody = document.getElementById("recordTableBody");
+            tableBody.innerHTML = "";
+            
+            records.forEach((record, index) => {
+                let row = `<tr>
+                    <td>${record.recorder}</td>
+                    <td>${record.group}</td>
+                    <td>${record.date}</td>
+                    <td>${record.event}</td>
+                    <td>${record.location}</td>
+                    <td>${record.attendees}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+        
+        function showRecordsPage() {
+            document.getElementById("mainPage").style.display = "none";
+            document.getElementById("recordsPage").style.display = "block";
+            displayRecords();
+        }
+        
+        function showMainPage() {
+            document.getElementById("recordsPage").style.display = "none";
+            document.getElementById("mainPage").style.display = "block";
+        }
+        
+        function clearRecords() {
+            localStorage.removeItem("attendanceRecords");
+            alert("所有历史记录已清除！");
+            displayRecords();
+        }
+    </script>
+</head>
+<body>
+    <div id="mainPage" class="container">
+        <h2>光青小组出席人数记录表</h2>
+        <form onsubmit="event.preventDefault(); saveRecord();">
+            <label>记录者：</label>
+            <input type="text" id="recorder" placeholder="请输入您的名字">
+            <label>小组：</label>
+            <select id="group">
+                <option value="光合作用">光合作用</option>
+                <option value="合伙人">合伙人</option>
+                <option value="合作愉快">合作愉快</option>
+                <option value="合平使者">合平使者</option>
+            </select>
+            <label>日期：</label>
+            <input type="date" id="date">
+            <label>节目/活动：</label>
+            <input type="text" id="event">
+            <label>地点：</label>
+            <input type="text" id="location">
+            <label>出席人数：</label>
+            <input type="number" id="attendees">
+            <button type="submit">保存记录</button>
+        </form>
+        <button onclick="showRecordsPage()">查看历史记录</button>
+    </div>
+    
+    <div id="recordsPage" class="container secondary-page">
+        <h3>历史记录</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>记录者</th>
+                    <th>小组</th>
+                    <th>日期</th>
+                    <th>节目/活动</th>
+                    <th>地点</th>
+                    <th>出席人数</th>
+                </tr>
+            </thead>
+            <tbody id="recordTableBody"></tbody>
+        </table>
+        <button onclick="clearRecords()">清除历史记录</button>
+        <button onclick="showMainPage()">返回</button>
+    </div>
+</body>
+</html>
