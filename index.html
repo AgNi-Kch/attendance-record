@@ -60,60 +60,79 @@
             color: white;
         }
     </style>
-    <script>
-        function saveRecord() {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD76pdCtwjGuWCFU5R2K4z4q2NB5z6kir4",
+            authDomain: "attendance-record-443f4.firebaseapp.com",
+            projectId: "attendance-record-443f4",
+            storageBucket: "attendance-record-443f4.firebasestorage.app",
+            messagingSenderId: "1095528525416",
+            appId: "1:1095528525416:web:32859a2e32805bc52d95dd",
+            measurementId: "G-15B2SC8HB6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function saveRecord() {
             let recorder = document.getElementById("recorder").value;
             let group = document.getElementById("group").value;
             let date = document.getElementById("date").value;
             let event = document.getElementById("event").value;
             let location = document.getElementById("location").value;
-            let attendees = document.getElementById("attendees").value;
+            let attendees = parseInt(document.getElementById("attendees").value, 10);
             
-            if (!recorder || !date || !event || !location || !attendees) {
+            if (!recorder || !date || !event || !location || isNaN(attendees)) {
                 alert("请填写所有字段！");
                 return;
             }
             
-            let record = { recorder, group, date, event, location, attendees };
-            let records = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
-            records.push(record);
-            localStorage.setItem("attendanceRecords", JSON.stringify(records));
-            alert("记录已保存！");
+            try {
+                await addDoc(collection(db, "attendance-records"), {
+                    记录者: recorder,
+                    小组: group,
+                    日期: date,
+                    节目活动: event,
+                    地点: location,
+                    出席人数: attendees
+                });
+                alert("记录已保存！");
+            } catch (error) {
+                console.error("错误: ", error);
+                alert("保存失败，请重试！");
+            }
         }
 
-        function displayRecords() {
-            let records = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
+        async function displayRecords() {
             let tableBody = document.getElementById("recordTableBody");
             tableBody.innerHTML = "";
-            
-            records.forEach((record, index) => {
+            const querySnapshot = await getDocs(collection(db, "attendance-records"));
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
                 let row = `<tr>
-                    <td>${record.recorder}</td>
-                    <td>${record.group}</td>
-                    <td>${record.date}</td>
-                    <td>${record.event}</td>
-                    <td>${record.location}</td>
-                    <td>${record.attendees}</td>
+                    <td>${data.记录者}</td>
+                    <td>${data.小组}</td>
+                    <td>${data.日期}</td>
+                    <td>${data.节目活动}</td>
+                    <td>${data.地点}</td>
+                    <td>${data.出席人数}</td>
                 </tr>`;
                 tableBody.innerHTML += row;
             });
         }
-        
+
         function showRecordsPage() {
             document.getElementById("mainPage").style.display = "none";
             document.getElementById("recordsPage").style.display = "block";
             displayRecords();
         }
-        
+
         function showMainPage() {
             document.getElementById("recordsPage").style.display = "none";
             document.getElementById("mainPage").style.display = "block";
-        }
-        
-        function clearRecords() {
-            localStorage.removeItem("attendanceRecords");
-            alert("所有历史记录已清除！");
-            displayRecords();
         }
     </script>
 </head>
@@ -142,7 +161,6 @@
         </form>
         <button onclick="showRecordsPage()">查看历史记录</button>
     </div>
-    
     <div id="recordsPage" class="container secondary-page">
         <h3>历史记录</h3>
         <table>
@@ -158,7 +176,6 @@
             </thead>
             <tbody id="recordTableBody"></tbody>
         </table>
-        <button onclick="clearRecords()">清除历史记录</button>
         <button onclick="showMainPage()">返回</button>
     </div>
 </body>
