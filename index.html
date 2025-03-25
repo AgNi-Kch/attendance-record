@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光青小组出席人数记录表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        select, input, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            text-align: left;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>光青小组出席人数记录表</h2>
+        <form onsubmit="event.preventDefault(); saveRecord();">
+            <label>记录者：</label>
+            <input type="text" id="recorder" placeholder="请输入您的名字">
+            <label>小组：</label>
+            <select id="group">
+                <option value="光合作用">光合作用</option>
+                <option value="合伙人">合伙人</option>
+                <option value="合作愉快">合作愉快</option>
+                <option value="合平使者">合平使者</option>
+            </select>
+            <label>日期：</label>
+            <input type="date" id="date">
+            <label>节目/活动：</label>
+            <input type="text" id="event">
+            <label>地点：</label>
+            <input type="text" id="location">
+            <label>出席人数：</label>
+            <input type="number" id="attendees">
+            <button type="submit">保存记录</button>
+        </form>
+        <button onclick="viewRecords()">查看历史记录</button>
+    </div>
+
+    <script>
+        function saveRecord() {
+            let recorder = document.getElementById("recorder").value;
+            let group = document.getElementById("group").value;
+            let date = document.getElementById("date").value;
+            let event = document.getElementById("event").value;
+            let location = document.getElementById("location").value;
+            let attendees = document.getElementById("attendees").value;
+
+            if (!recorder || !date || !event || !location || !attendees) {
+                alert("请填写所有字段！");
+                return;
+            }
+
+            let record = { recorder, group, date, event, location, attendees };
+            let records = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
+            records.push(record);
+            localStorage.setItem("attendanceRecords", JSON.stringify(records));
+            alert("记录已保存！");
+        }
+
+        function viewRecords() {
+            window.location.href = "records.html";
+        }
+    </script>
+</body>
+</html>
