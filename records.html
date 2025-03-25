@@ -3,13 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>历史记录</title>
+    <title>光青小组出席人数记录表</title>
+    <script type="module">
+        // 1️⃣ 导入 Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getFirestore, collection, query, onSnapshot, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        // 2️⃣ Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyD76pdCtwjGuWCFU5R2K4z4q2NB5z6kir4",
+            authDomain: "attendance-record-443f4.firebaseapp.com",
+            projectId: "attendance-record-443f4",
+            storageBucket: "attendance-record-443f4.appspot.com",
+            messagingSenderId: "1095528525416",
+            appId: "1:1095528525416:web:32859a2e32805bc52d95dd",
+            measurementId: "G-15B2SC8HB6"
+        };
+
+        // 3️⃣ 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 4️⃣ 显示历史记录（自动从 Firestore 读取）
+        function displayRecords() {
+            const tableBody = document.getElementById("recordTableBody");
+            tableBody.innerHTML = "";
+
+            const q = query(collection(db, "attendanceRecords"), orderBy("date", "desc"));
+            onSnapshot(q, (snapshot) => {
+                tableBody.innerHTML = "";
+                snapshot.forEach((doc) => {
+                    const record = doc.data();
+                    const row = `<tr>
+                        <td>${record.recorder}</td>
+                        <td>${record.group}</td>
+                        <td>${record.date}</td>
+                        <td>${record.event}</td>
+                        <td>${record.location}</td>
+                        <td>${record.attendees}</td>
+                        <td><button onclick="deleteRecord('${doc.id}')">删除</button></td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            });
+        }
+
+        // 5️⃣ 删除记录
+        async function deleteRecord(id) {
+            if (confirm("确定要删除这条记录吗？")) {
+                await deleteDoc(doc(db, "attendanceRecords", id));
+                alert("记录已删除！");
+            }
+        }
+
+        // 6️⃣ 页面切换
+        function showMainPage() {
+            window.location.href = "index.html";
+        }
+
+        window.onload = displayRecords;
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            text-align: center;
+            margin: 0;
             padding: 20px;
+            text-align: center;
         }
         .container {
             background: white;
@@ -22,24 +82,29 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: center;
+            word-wrap: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         th {
             background-color: #007bff;
             color: white;
         }
         button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             background-color: #007bff;
             color: white;
-            border: none;
-            padding: 10px;
-            margin-top: 10px;
-            cursor: pointer;
-            border-radius: 5px;
         }
         button:hover {
             background-color: #0056b3;
@@ -48,7 +113,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>历史记录</h2>
+        <h3>历史记录</h3>
         <table>
             <thead>
                 <tr>
@@ -58,44 +123,12 @@
                     <th>节目/活动</th>
                     <th>地点</th>
                     <th>出席人数</th>
+                    <th>操作</th>
                 </tr>
             </thead>
             <tbody id="recordTableBody"></tbody>
         </table>
-        <button onclick="clearRecords()">清除历史记录</button>
-        <button onclick="goBack()">返回</button>
+        <button onclick="showMainPage()">返回</button>
     </div>
-
-    <script>
-        function displayRecords() {
-            let records = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
-            let tableBody = document.getElementById("recordTableBody");
-            tableBody.innerHTML = "";
-            
-            records.forEach(record => {
-                let row = `<tr>
-                    <td>${record.recorder}</td>
-                    <td>${record.group}</td>
-                    <td>${record.date}</td>
-                    <td>${record.event}</td>
-                    <td>${record.location}</td>
-                    <td>${record.attendees}</td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
-
-        function clearRecords() {
-            localStorage.removeItem("attendanceRecords");
-            alert("所有历史记录已清除！");
-            displayRecords();
-        }
-
-        function goBack() {
-            window.location.href = "index.html";
-        }
-
-        window.onload = displayRecords;
-    </script>
 </body>
 </html>
